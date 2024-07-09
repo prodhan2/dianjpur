@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Students Information</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .profile-pic {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #007bff;
+    }
+
+    .card {
+      border: 1px solid #ddd; /* Card border */
+      border-radius: 8px; /* Rounded corners */
+      transition: box-shadow 0.3s ease; /* Smooth shadow transition */
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow on hover */
+    }
+
+    /* Styling for the footer */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    /* Styling for fixed home button */
+    #home-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000; /* Ensure it's above other content */
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed Home Button -->
+  <div class="container mt-5">
+    
+    <!-- Search Box -->
+    <div class="input-group mb-3">
+      <input type="text" id="search-input" class="form-control" placeholder="Search by name or department...">
+      <div class="input-group-append">
+        <button class="btn btn-primary" type="button" id="search-btn">Search</button>
+      </div>
+    </div>
+
+    <!-- Result Count -->
+    <div id="result-count" class="mb-3 text-muted"></div>
+
+    <!-- Student Cards Container -->
+    <div id="student-cards" class="row">
+      <!-- Student cards will be dynamically added here -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Powered by Sujan Prodhan
+  </footer>
+
+  <script src="data.js"></script>
+  <script>
+    // Function to display all students initially
+    function displayAllStudents() {
+      const studentCardsContainer = document.getElementById('student-cards');
+      studentCardsContainer.innerHTML = ''; // Clear previous content
+      
+      // Loop through each student in the data
+      studentData.forEach(function(student, index) {
+        const card = `
+          <div class="col-md-4 mb-4">
+            <div class="card shadow-sm"> <!-- Added shadow-sm for subtle shadow effect -->
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <img src="${student.image}" alt="${student.name}'s image" class="profile-pic mr-3">
+                  <div>
+                    <h5 class="card-title">${student.name} (${student.session})</h5>
+                    <p class="mb-1">${student.department}</p>
+                    <button class="btn btn-primary btn-sm mr-2" onclick="callStudent('${student.phone}')">Call Now</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showProfile(${index})">More</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        studentCardsContainer.innerHTML += card; // Append card to container
+      });
+
+      // Show initial count of students
+      document.getElementById('result-count').textContent = `Found ${studentData.length} students`;
+    }
+
+    // Display all students initially
+    displayAllStudents();
+
+    // Function to filter students based on search input
+    document.getElementById('search-btn').addEventListener('click', function() {
+      const searchInput = document.getElementById('search-input').value.toLowerCase().trim();
+      const filteredStudents = studentData.filter(function(student) {
+        // Check if searchInput matches any criteria (name or department)
+        return (
+          student.name.toLowerCase().includes(searchInput) ||
+          student.department.toLowerCase().includes(searchInput) ||
+          student.session.toLowerCase().includes(searchInput) 
+        
+        
+        );
+      });
+
+      // Display filtered students or show message if no results found
+      const studentCardsContainer = document.getElementById('student-cards');
+      studentCardsContainer.innerHTML = ''; // Clear previous content
+      
+      if (filteredStudents.length > 0) {
+        filteredStudents.forEach(function(student, index) {
+          const card = `
+            <div class="col-md-4 mb-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <img src="${student.image}" alt="${student.name}'s image" class="profile-pic mr-3">
+                    <div>
+                      <h5 class="mb-1">${student.name}</h5>
+                      <p class="mb-1">${student.department}</p>
+                      <button class="btn btn-primary btn-sm mr-2" onclick="callStudent('${student.phone}')">Call Now</button>
+                      <button class="btn btn-secondary btn-sm" onclick="showProfile(${studentData.indexOf(student)})">More</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          studentCardsContainer.innerHTML += card; // Append card to container
+        });
+
+        // Update result count message
+        document.getElementById('result-count').textContent = `Found ${filteredStudents.length} ${filteredStudents.length > 1 ? 'students' : 'student'}`;
+      } else {
+        studentCardsContainer.innerHTML = '<p class="text-muted">Sorry, no matching students found. We are working to add this information soon.</p>';
+        document.getElementById('result-count').textContent = ''; // Clear result count if no results found
+      }
+    });
+
+    // Function to handle calling a student (dummy function for example)
+    function callStudent(phoneNumber) {
+      alert(`Calling ${phoneNumber}...`);
+      // Replace with actual call functionality
+    }
+
+    // Function to show detailed profile (dummy function for example)
+    function showProfile(index) {
+      localStorage.setItem('currentStudent', JSON.stringify(studentData[index]));
+      window.location.href = 'student_profile.html';
+    }
+
+    // Function to navigate back to home page
+  </script>
+</body>
+</html>

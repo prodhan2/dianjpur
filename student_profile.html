@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .profile-pic {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #007bff;
+    }
+    
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    
+    .btn-group .btn {
+      margin: 5px;
+      flex: 1;
+      max-width: 150px; /* Limit button width */
+    }
+    
+    /* Updated styles */
+    .table-bordered {
+      border-color: #007bff; /* Update border color */
+    }
+    
+    #profile-name {
+      background-color: #007bff; /* Update background color */
+      color: rgb(255, 255, 255); /* Text color for contrast */
+      padding: 10px; /* Padding for better appearance */
+      display: inline-block; /* Ensure block display with padding */
+      border-radius: 10px; /* Rounded corners */
+      }
+    
+    @keyframes nameAnimation {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="text-center mb-4">
+      <img src="" alt="Student Profile Picture" class="profile-pic" id="profile-pic">
+      <h2 id="profile-name">Student Name</h2>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <tbody id="profile-details">
+          <!-- Student profile details will be populated here -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="btn-group">
+      <button class="btn btn-primary" id="download-profile-btn">Download Profile Card</button>
+      <button class="btn btn-success" id="share-profile-btn">Share Profile</button>
+      <button class="btn btn-info" id="generate-qr-btn">Generate QR Code</button>
+      <button class="btn btn-secondary" id="copy-info-btn">Copy Information</button>
+    </div>
+  </div>
+  
+  <script src="data.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+  <script>
+    // Function to navigate back to the previous page
+    function goBack() {
+      window.history.back();
+    }
+
+    window.onload = function() {
+      const currentStudent = JSON.parse(localStorage.getItem('currentStudent'));
+
+      // Display profile picture and name
+      document.getElementById('profile-pic').src = currentStudent.image;
+      document.getElementById('profile-name').textContent = currentStudent.name;
+
+      // Populate profile details in table format
+      const profileDetails = document.getElementById('profile-details');
+      profileDetails.innerHTML = `
+        <tr>
+          <th scope="row">Blood Group</th>
+          <td>${currentStudent.blood}</td>
+        </tr>
+        <tr>
+          <th scope="row">Upazila</th>
+          <td>${currentStudent.upazila}</td>
+        </tr>
+        <tr>
+          <th scope="row">College</th>
+          <td>${currentStudent.college}</td>
+        </tr>
+        <tr>
+          <th scope="row">School</th>
+          <td>${currentStudent.school}</td>
+        </tr>
+        <tr>
+          <th scope="row">Department</th>
+          <td>${currentStudent.department}</td>
+        </tr>
+        <tr>
+          <th scope="row">Email</th>
+          <td>${currentStudent.email}</td>
+        </tr>
+        <tr>
+          <th scope="row">Hall Name</th>
+          <td>${currentStudent.hall}</td>
+        </tr>
+        <tr>
+          <th scope="row">Phone</th>
+          <td>${currentStudent.phone}</td>
+        </tr>
+      `;
+    };
+
+    // Function to trigger download and show download confirmation for profile card
+    document.getElementById('download-profile-btn').addEventListener('click', function() {
+      // Use html2canvas to capture the container
+      html2canvas(document.querySelector('.container')).then(function(canvas) {
+        // Convert canvas to blob
+        canvas.toBlob(function(blob) {
+          // Save blob as a file using FileSaver.js
+          saveAs(blob, 'student_profile.png');
+          
+          // Show download confirmation
+          alert('Profile card downloaded successfully!');
+        });
+      }).catch(function(error) {
+        console.error('Error capturing canvas:', error);
+        alert('Failed to download profile card. Please try again.');
+      });
+    });
+
+    // Function to share profile via some action (e.g., social media)
+    document.getElementById('share-profile-btn').addEventListener('click', function() {
+      // Replace with actual sharing logic (e.g., sharing via social media APIs)
+      alert(`Sharing ${currentStudent.name}'s profile...`);
+    });
+
+    // Function to generate and download QR code
+    document.getElementById('generate-qr-btn').addEventListener('click', function() {
+      // Generate QR code
+      const qr = new QRCode(document.createElement('div'), {
+        text: JSON.stringify(currentStudent),
+        width: 128,
+        height: 128,
+      });
+
+      // Convert QR code to base64 image
+      const qrImage = qr._el.childNodes[0].toDataURL('image/png');
+
+      // Create anchor element to trigger download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = qrImage;
+      downloadLink.download = 'student_profile_qr.png';
+      downloadLink.click();
+    });
+
+    // Function to copy profile information to clipboard
+    document.getElementById('copy-info-btn').addEventListener('click', function() {
+      const profileInfo = `Name: ${currentStudent.name}\nDepartment: ${currentStudent.department}\nPhone: ${currentStudent.phone}`;
+      
+      // Create a textarea element to hold the text to copy
+      const textarea = document.createElement('textarea');
+      textarea.value = profileInfo;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px'; // Move the textarea off-screen
+      document.body.appendChild(textarea);
+      
+      // Select and copy the text inside the textarea
+      textarea.select();
+      document.execCommand('copy');
+      
+      // Clean up
+      document.body.removeChild(textarea);
+
+      // Show copy confirmation
+      alert('Profile information copied to clipboard!');
+    });
+  </script>
+</body>
+</html>
